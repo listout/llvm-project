@@ -40,11 +40,12 @@ using tools::addPathIfExists;
 std::string Linux::getMultiarchTriple(const Driver &D,
                                       const llvm::Triple &TargetTriple,
                                       StringRef SysRoot) const {
-  llvm::Triple::EnvironmentType TargetEnvironment =
-      TargetTriple.getEnvironment();
   bool IsAndroid = TargetTriple.isAndroid();
   bool IsMipsR6 = TargetTriple.getSubArch() == llvm::Triple::MipsSubArch_r6;
   bool IsMipsN32Abi = TargetTriple.getEnvironment() == llvm::Triple::GNUABIN32;
+
+  std::string EnvName =
+      TargetTriple.getEnvironmentTypeName(TargetTriple.getEnvironment()).str();
 
   // For most architectures, just use whatever we have rather than trying to be
   // clever.
@@ -60,36 +61,30 @@ std::string Linux::getMultiarchTriple(const Driver &D,
   case llvm::Triple::thumb:
     if (IsAndroid)
       return "arm-linux-androideabi";
-    if (TargetEnvironment == llvm::Triple::GNUEABIHF)
-      return "arm-linux-gnueabihf";
-    return "arm-linux-gnueabi";
+    return "arm-linux-" + EnvName;
   case llvm::Triple::armeb:
   case llvm::Triple::thumbeb:
-    if (TargetEnvironment == llvm::Triple::GNUEABIHF)
-      return "armeb-linux-gnueabihf";
-    return "armeb-linux-gnueabi";
+    return "armeb-linux-" + EnvName;
   case llvm::Triple::x86:
     if (IsAndroid)
       return "i686-linux-android";
-    return "i386-linux-gnu";
+    return "i386-linux-" + EnvName;
   case llvm::Triple::x86_64:
     if (IsAndroid)
       return "x86_64-linux-android";
-    if (TargetEnvironment == llvm::Triple::GNUX32)
-      return "x86_64-linux-gnux32";
-    return "x86_64-linux-gnu";
+    return "x86_64-linux-" + EnvName;
   case llvm::Triple::aarch64:
     if (IsAndroid)
       return "aarch64-linux-android";
-    return "aarch64-linux-gnu";
+    return "aarch64-linux-" + EnvName;
   case llvm::Triple::aarch64_be:
-    return "aarch64_be-linux-gnu";
+    return "aarch64_be-linux-" + EnvName;
 
   case llvm::Triple::m68k:
-    return "m68k-linux-gnu";
+    return "m68k-linux-" + EnvName;
 
   case llvm::Triple::mips:
-    return IsMipsR6 ? "mipsisa32r6-linux-gnu" : "mips-linux-gnu";
+    return IsMipsR6 ? "mipsisa32r6-linux-gnu" : "mips-linux-" + EnvName;
   case llvm::Triple::mipsel:
     if (IsAndroid)
       return "mipsel-linux-android";
@@ -117,21 +112,21 @@ std::string Linux::getMultiarchTriple(const Driver &D,
   case llvm::Triple::ppc:
     if (D.getVFS().exists(concat(SysRoot, "/lib/powerpc-linux-gnuspe")))
       return "powerpc-linux-gnuspe";
-    return "powerpc-linux-gnu";
+    return "powerpc-linux-" + EnvName;
   case llvm::Triple::ppcle:
-    return "powerpcle-linux-gnu";
+    return "powerpcle-linux-" + EnvName;
   case llvm::Triple::ppc64:
-    return "powerpc64-linux-gnu";
+    return "powerpc64-linux-" + EnvName;
   case llvm::Triple::ppc64le:
-    return "powerpc64le-linux-gnu";
+    return "powerpc64le-linux-" + EnvName;
   case llvm::Triple::riscv64:
-    return "riscv64-linux-gnu";
+    return "riscv64-linux-" + EnvName;
   case llvm::Triple::sparc:
-    return "sparc-linux-gnu";
+    return "sparc-linux-" + EnvName;
   case llvm::Triple::sparcv9:
-    return "sparc64-linux-gnu";
+    return "sparc64-linux-" + EnvName;
   case llvm::Triple::systemz:
-    return "s390x-linux-gnu";
+    return "s390x-linux-" + EnvName;
   }
   return TargetTriple.str();
 }
