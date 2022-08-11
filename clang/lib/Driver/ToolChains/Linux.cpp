@@ -23,6 +23,7 @@
 #include "llvm/Support/ScopedPrinter.h"
 #include "llvm/Support/VirtualFileSystem.h"
 #include <system_error>
+#include <iostream>
 
 using namespace clang::driver;
 using namespace clang::driver::toolchains;
@@ -40,12 +41,17 @@ using tools::addPathIfExists;
 std::string Linux::getMultiarchTriple(const Driver &D,
                                       const llvm::Triple &TargetTriple,
                                       StringRef SysRoot) const {
+
+  llvm::Triple::EnvironmentType TargetEnvironment =
+      TargetTriple.getEnvironment();
   bool IsAndroid = TargetTriple.isAndroid();
   bool IsMipsR6 = TargetTriple.getSubArch() == llvm::Triple::MipsSubArch_r6;
   bool IsMipsN32Abi = TargetTriple.getEnvironment() == llvm::Triple::GNUABIN32;
 
   std::string EnvName =
-      TargetTriple.getEnvironmentTypeName(TargetTriple.getEnvironment()).str();
+      TargetTriple.getEnvironmentTypeName(TargetEnvironment).str();
+  std::cout << TargetTriple.getEnvironment() << std::endl;
+  std::cout << EnvName << std::endl;
 
   // For most architectures, just use whatever we have rather than trying to be
   // clever.
